@@ -1,0 +1,52 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "AWS CloudFormation -- S3 Bucket with Puclic read to host static Website",
+    "Resources": {
+        "saini1SWebsite": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "WebsiteConfiguration": {
+                    "IndexDocument": "index.html",
+                    "ErrorDocument": "error.html"
+                }
+               
+                
+            },
+            "Description":"Public read access to bucket saini1SWebsite and start & default documents",
+            "DeletionPolicy": "Retain"
+            
+        }
+       
+    },
+
+    
+    "Outputs": {
+        "WebsiteURL": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "saini1SWebsite",
+                    "WebsiteURL"
+                ]
+            },
+            "Description": "URL for the static website hosted on S3"
+        },
+        "S3BucketSecureURL": {
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Fn::GetAtt": [
+                                "saini1SWebsite",
+                                "DomainName"
+                            ]
+                        }
+                    ]
+                ]
+            },
+            "Description": "saini1SWebsite S3 bucket to hold website content"
+        }
+    }
+}
