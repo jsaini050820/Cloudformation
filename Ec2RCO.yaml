@@ -1,0 +1,76 @@
+
+Parameters:
+  InstanceTypeParameter1:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+    - t2.micro
+    - m1.small
+    - m1.large
+  EnvType:
+    Description: Environment type
+    Default: test
+    Type: String
+    AllowedValues:
+      - prod
+      - test
+    ConstraintDescription: must specify prod or test
+Conditions:
+  CreateProdResources: !Equals 
+    - !Ref EnvType
+    - prod
+Mappings: 
+  RegionMap: 
+    us-east-2:
+      HVM64: ami-0cff7528ff583bf9a
+      HVMG2: ami-054ac3ef3210b992c
+    us-west-1:
+      HVM64: ami-0cff7528ff583bf9a
+      HVMG2: ami-054ac3ef3210b992c
+Outputs:
+   InstanceID:
+    Description: The Instance ID
+    Value: !Ref myEC2Instance
+   StackEC2:
+    Description: The ID of the EC2 Instance
+    Value: !Ref myEC2Instance
+    Export:
+      Name: !Sub "${AWS::StackName}-EC2"
+Resources:
+  MyInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-a4c7edb2
+      InstanceType: t2.micro
+      SecurityGroups:
+        - !Ref SSHSecurityGroup
+        - !Ref ServerSecurityGroup
+
+  MyEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref MyInstance
+
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+      - CidrIp: 0.0.0.0/0
+        FromPort: 22
+        IpProtocol: tcp
+        ToPort: 22
+
+  ServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: allow connections from specified CIDR ranges
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 192.168.1.1/32
